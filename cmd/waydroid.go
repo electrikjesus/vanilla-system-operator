@@ -97,6 +97,18 @@ func NewWayCommand() []*cmdr.Command {
 			vso.Trans("waydroid.init.options.force.description"),
 			false,
 		),
+		cmdr.NewBoolFlag(
+			"gapps",
+			"g",
+			vso.Trans("waydroid.init.options.gapps.description"),
+			false,
+		),
+		cmdr.NewBoolFlag(
+			"foss",
+			"l",
+			vso.Trans("waydroid.init.options.foss.description"),
+			false,
+		),
 	)
 
 	launchCmd := cmdr.NewCommand(
@@ -125,6 +137,13 @@ func NewWayCommand() []*cmdr.Command {
 		vso.Trans("waydroid.search.description"),
 		vso.Trans("waydroid.search.description"),
 		waySearch,
+	)
+
+	shellCmd := cmdr.NewCommand(
+		"shell",
+		vso.Trans("waydroid.shell.description"),
+		vso.Trans("waydroid.shell.description"),
+		wayShell,
 	)
 
 	syncCmd := cmdr.NewCommand(
@@ -262,7 +281,8 @@ func wayStatus(cmd *cobra.Command, args []string) error {
 
 func wayInit(cmd *cobra.Command, args []string) error {
 	isSupported()
-
+	gapps, _ := cmd.Flags().GetBool("gapps")
+	foss, _ := cmd.Flags().GetBool("foss")
 	force, _ := cmd.Flags().GetBool("force")
 	if !force {
 		if !core.AskConfirmation(vso.Trans("waydroid.init.warnUnstable"), false) {
@@ -281,9 +301,21 @@ func wayInit(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	err := core.WayInit()
-	if err != nil {
-		return err
+	if gapps {
+		err := core.WayInit("GAPPS")
+		if err != nil {
+			return err
+		}
+	} else if foss {
+		err := core.WayInit("FOSS")
+		if err != nil {
+			return err
+		}
+	} else {
+		err := core.WayInit()
+		if err != nil {
+			return err
+		}
 	}
 
 	cmdr.Success.Println(vso.Trans("waydroid.init.info.initialized"))
@@ -549,6 +581,24 @@ func waySearch(cmd *cobra.Command, args []string) error {
 	table.Render()
 
 	return nil
+}
+
+func wayShell(cmd *cobra.Command, args []string) error {
+	isSupported()
+
+	way, err := core.GetWay()
+	if err != nil {
+		return err
+	}
+
+	err = core.EnsureWayStarted()
+	if err != nil {
+		return err
+	}
+
+	finalArgs := []string{"sudo", "ewaydroid", "shell"}
+	_, err = way.Exec(false, false, finalArgs...)
+	return err
 }
 
 func waySync(cmd *cobra.Command, args []string) error {

@@ -277,6 +277,10 @@ waydroid:
     options:
       force:
         description: "Force the initialization"
+      gapps:
+        description: "Install GApps Waydroid image"
+      foss:
+        description: "Install Foss Waydroid image"
     info:
       initialized: "The waydroid subsystem has been initialized."
     error:
@@ -296,6 +300,8 @@ waydroid:
       RemoveCancelled: "Removal Cancelled"
   search:
     description: "Search for an application"
+  shell:
+    description: "Show the waydroid shell"
   sync:
     description: "Sync the repositories"
   update:

@@ -178,7 +178,8 @@ func WayExists() bool {
 	return err == nil
 }
 
-func WayInit() error {
+func WayInit(type) error {
+	variant := type
 	stack, _ := core.LoadStack("vso-waydroid")
 	subsystem, err := core.NewSubSystem(
 		"vso-waydroid",
@@ -206,7 +207,13 @@ func WayInit() error {
 		return err
 	}
 
-	finalArgs := []string{"sudo", "ewaydroid", "init"}
+	if variant == nil {
+		finalArgs := []string{"sudo", "ewaydroid", "init"}
+	} else {
+		fmt.Println(variant)
+		finalArgs := []string{"sudo", "ewaydroid", "init", "-s", variant, "-f"}
+	}
+
 	way.Exec(false, false, finalArgs...)
 	_, err = way.Exec(false, false, finalArgs...)
 	// oh, the above? yeah, it's a hack. I don't know why it doesn't work the
